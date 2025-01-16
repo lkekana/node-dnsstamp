@@ -1,5 +1,3 @@
-'use strict';
-
 import * as URLSafeBase64 from "urlsafe-base64";
 
 enum Protocol {
@@ -49,14 +47,14 @@ export namespace DNSStamp {
         }
 
         public toString() {
-            let props = this.props.toNumber();
-            let addr = this.addr.split("").map(c => c.charCodeAt(0));
+            const props = this.props.toNumber();
+            const addr = this.addr.split("").map(c => c.charCodeAt(0));
 
-            let v = [Protocol.DNSCrypt, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+            const v = [Protocol.DNSCrypt, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
             v.push(addr.length, ...addr);
-            let pk = Buffer.from(this.pk.replace(/[: \t]/g, ""), "hex");
+            const pk = Buffer.from(this.pk.replace(/[: \t]/g, ""), "hex");
             v.push(pk.length, ...pk);
-            let providerName = this.providerName.split("").map(c => c.charCodeAt(0));
+            const providerName = this.providerName.split("").map(c => c.charCodeAt(0));
             v.push(providerName.length, ...providerName);
             return `sdns://${URLSafeBase64.encode(Buffer.from(v))}`;
         }
@@ -85,12 +83,12 @@ export namespace DNSStamp {
         }
 
         public toString(): string {
-            let props = this.props.toNumber();
+            const props = this.props.toNumber();
 
-            let v = [Protocol.ODOH, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
-            let hostName = this.hostName.split("").map(c => c.charCodeAt(0));
+            const v = [Protocol.ODOH, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+            const hostName = this.hostName.split("").map(c => c.charCodeAt(0));
             v.push(hostName.length, ...hostName);
-            let path = this.path.split("").map(c => c.charCodeAt(0));
+            const path = this.path.split("").map(c => c.charCodeAt(0));
             v.push(path.length, ...path);
             return `sdns://${URLSafeBase64.encode(Buffer.from(v))}`;
         }
@@ -118,16 +116,16 @@ export namespace DNSStamp {
         }
 
         _toString (protocol: Protocol) {
-            let props = this.props.toNumber();
-            let addr = this.addr.split("").map(c => c.charCodeAt(0));
+            const props = this.props.toNumber();
+            const addr = this.addr.split("").map(c => c.charCodeAt(0));
 
-            let v = [protocol, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+            const v = [protocol, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
             v.push(addr.length, ...addr);
-            let hash = Buffer.from(this.hash.replace(/[: \t]/g, ""), "hex");
+            const hash = Buffer.from(this.hash.replace(/[: \t]/g, ""), "hex");
             v.push(hash.length, ...hash);
-            let hostName = this.hostName.split("").map(c => c.charCodeAt(0));
+            const hostName = this.hostName.split("").map(c => c.charCodeAt(0));
             v.push(hostName.length, ...hostName);
-            let path = this.path.split("").map(c => c.charCodeAt(0));
+            const path = this.path.split("").map(c => c.charCodeAt(0));
             v.push(path.length, ...path);
             return `sdns://${URLSafeBase64.encode(Buffer.from(v))}`;
         }
@@ -157,14 +155,14 @@ export namespace DNSStamp {
         }
 
         public toString(): string {
-            let props = this.props.toNumber();
-            let addr = this.addr.split("").map(c => c.charCodeAt(0));
+            const props = this.props.toNumber();
+            const addr = this.addr.split("").map(c => c.charCodeAt(0));
 
-            let v = [Protocol.DOT, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+            const v = [Protocol.DOT, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
             v.push(addr.length, ...addr);
-            let hash = Buffer.from(this.hash.replace(/[: \t]/g, ""), "hex");
+            const hash = Buffer.from(this.hash.replace(/[: \t]/g, ""), "hex");
             v.push(hash.length, ...hash);
-            let hostName = this.hostName.split("").map(c => c.charCodeAt(0));
+            const hostName = this.hostName.split("").map(c => c.charCodeAt(0));
             v.push(hostName.length, ...hostName);
             return `sdns://${URLSafeBase64.encode(Buffer.from(v))}`;
         }
@@ -185,10 +183,10 @@ export namespace DNSStamp {
         }
 
         public toString(): string {
-            let props = this.props.toNumber();
-            let addr = this.addr.split("").map(c => c.charCodeAt(0));
+            const props = this.props.toNumber();
+            const addr = this.addr.split("").map(c => c.charCodeAt(0));
 
-            let v = [Protocol.Plain, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+            const v = [Protocol.Plain, props, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
             v.push(addr.length, ...addr);
             return `sdns://${URLSafeBase64.encode(Buffer.from(v))}`;
         }
@@ -209,9 +207,9 @@ export namespace DNSStamp {
         }
 
         public toString(): string {
-            let addr = this.addr.split("").map(c => c.charCodeAt(0));
+            const addr = this.addr.split("").map(c => c.charCodeAt(0));
 
-            let v = [Protocol.AnonymizedRelay];
+            const v = [Protocol.AnonymizedRelay];
             v.push(addr.length, ...addr);
             return `sdns://${URLSafeBase64.encode(Buffer.from(v))}`;
         }
@@ -227,7 +225,7 @@ export namespace DNSStamp {
         if (stamp.substr(0, 7) !== "sdns://") {
             throw new Error("invalid scheme");
         }
-        let bin = URLSafeBase64.decode(stamp.substr(7));
+        const bin = URLSafeBase64.decode(stamp.substr(7));
         const type = bin[0];
         if (type === Protocol.AnonymizedRelay) {
             const addrLen = bin[1];
@@ -240,15 +238,15 @@ export namespace DNSStamp {
             nofilter: !!((bin[1] >> 2) & 1),
         });
         let i = 9;
-        let addrLen = bin[i++];
+        const addrLen = bin[i++];
         const addr = bin.slice(i, i + addrLen).toString("utf-8");
         i += addrLen;
         switch (type) {
             case Protocol.DNSCrypt: {
-                let pkLen = bin[i++];
+                const pkLen = bin[i++];
                 const pk = bin.slice(i, i + pkLen).toString("hex");
                 i += pkLen;
-                let providerNameLen = bin[i++];
+                const providerNameLen = bin[i++];
                 const providerName = bin.slice(i, i + providerNameLen).toString("utf-8");
                 return new DNSCrypt(addr, { props, pk, providerName });
             }

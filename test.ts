@@ -1,5 +1,3 @@
-'use strict';
-
 import * as chai from 'chai';
 import { DNSStamp } from './stamp';
 
