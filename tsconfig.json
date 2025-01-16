@@ -2,8 +2,9 @@
     "compilerOptions": {
         "outDir": "./dist",
         "target": "esnext",
-        "lib": ["es6"],
-        "module": "commonjs",
+        "lib": ["ES2020", "DOM"],
+        "module": "ESNext",
+        "moduleResolution": "node",
         "sourceMap": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
@@ -15,6 +16,9 @@
         "noUnusedLocals": true,
         "removeComments": true,
         "strictNullChecks": true,
-        "downlevelIteration": true
-    }
+        "downlevelIteration": true,
+        "declaration": true,
+        "declarationDir": "./dist/types"
+    },
+    "include": ["./stamp.ts", "./test.ts"]
 }

@@ -1,15 +1,16 @@
 {
-  "name": "@leichtgewicht/dnsstamp",
-  "version": "1.1.4",
-  "description": "DNS Stamp de/encoder",
+  "name": "@lkekana/dnsstamp",
+  "version": "1.2.0",
+  "description": "A modern implementation of Olivier Poitrey and Martin Heidegger's DNS Stamp encoder & decoder",
   "main": "dist/stamp.js",
+  "types": "dist/stamp.d.ts",
   "scripts": {
     "prepare": "tsc",
     "test": "nyc mocha --require ts-node/register --require source-map-support/register test.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rs/node-dnsstamp.git"
+    "url": "git+https://github.com/lkekana/node-dnsstamp.git"
   },
   "keywords": [
     "dns",
@@ -18,12 +19,12 @@
     "sdns",
     "stamp"
   ],
-  "author": "Olivier Poitrey",
+  "author": "Olivier Poitrey, Martin Heidegger, Lesedi Kekana",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rs/node-dnsstamp/issues"
+    "url": "https://github.com/lkekana/node-dnsstamp/issues"
   },
-  "homepage": "https://github.com/rs/node-dnsstamp#readme",
+  "homepage": "https://github.com/lkekana/node-dnsstamp#readme",
   "dependencies": {
     "urlsafe-base64": "^1.0.0"
   },
