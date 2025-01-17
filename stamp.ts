@@ -270,7 +270,7 @@ export namespace DNSStamp {
 	}
 
 	export function parse(stamp: string): Stamp {
-		if (stamp.substr(0, 7) !== "sdns://") {
+		if (!stamp.startsWith("sdns://")) {
 			throw new Error("invalid scheme");
 		}
 		const bin = URLSafeBase64.decode(stamp.substr(7));
