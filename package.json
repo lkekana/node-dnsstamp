@@ -1,6 +1,6 @@
 {
   "name": "@lkekana/dnsstamp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A modern implementation of Olivier Poitrey and Martin Heidegger's DNS Stamp encoder & decoder",
   "main": "dist/stamp.js",
   "types": "dist/types/stamp.d.ts",
