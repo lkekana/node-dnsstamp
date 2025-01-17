@@ -1,5 +1,8 @@
 import * as URLSafeBase64 from "urlsafe-base64";
 
+/**
+ * Enumeration of supported DNS stamp protocols.
+ */
 enum Protocol {
 	DNSCrypt = 0x01,
 	DOH,
@@ -10,16 +13,45 @@ enum Protocol {
 	ODOHRelay = 0x85,
 }
 
+/**
+ * Namespace containing DNS stamp related functionality.
+ * DNS stamps are compact strings containing all the necessary information to connect to DNS servers.
+ */
 export namespace DNSStamp {
+	/**
+	 * Represents the properties of a DNS stamp.
+	 */
 	export class Properties {
+		/**
+		 * Indicates whether DNSSEC validation is required.
+		 * @default true
+		 */
 		dnssec = true;
+
+		/**
+		 * Indicates whether the server promises not to log user queries.
+		 * @default true
+		 */
 		nolog = true;
+
+		/**
+		 * Indicates whether the server promises not to filter any results.
+		 * @default true
+		 */
 		nofilter = true;
 
+		/**
+		 * Creates a new Properties instance.
+		 * @param init - Optional partial properties to initialize with
+		 */
 		constructor(init?: Partial<Properties>) {
 			Object.assign(this, init);
 		}
 
+		/**
+		 * Converts the properties to a number representation.
+		 * @returns A number representing the binary state of all properties
+		 */
 		toNumber(): number {
 			return (
 				((this.dnssec ? 1 : 0) << 0) |
@@ -29,23 +61,41 @@ export namespace DNSStamp {
 		}
 	}
 
+	/**
+	 * Base interface for all DNS stamps.
+	 */
 	export interface Stamp {
+		/**
+		 * Converts the stamp to its string representation.
+		 * @returns The string representation of the stamp
+		 */
 		toString(): string;
 	}
 
-	export class DNSCrypt {
+	/**
+	 * Represents a DNSCrypt stamp.
+	 */
+	export class DNSCrypt implements Stamp {
+		/**
+		 * The properties of the DNSCrypt stamp.
+		 */
 		props = new Properties();
-		// pk is the DNSCrypt provider’s Ed25519 public key, as 32 raw bytes.
+
+		/**
+		 * The DNSCrypt provider's Ed25519 public key as 32 raw bytes.
+		 */
 		pk = "";
-		// providerName is the DNSCrypt provider name.
+		
+		/**
+		 * The DNSCrypt provider name.
+		 */
 		providerName = "";
 
-		// Creates a new DNSCrypt stamp.
-		//
-		// @param addr is the IP address, as a string, with a port number if the
-		// server is not accessible over the standard port for the protocol
-		// (443). IPv6 strings must be included in square brackets:
-		// [fe80::6d6d:f72c:3ad:60b8]. Scopes are permitted.
+		/**
+		 * Creates a new DNSCrypt stamp.
+		 * @param addr - The IP address, as a string, with optional port number (if the server is not accessible over the standard port for the protocol, i.e. port 443). IPv6 addresses must be in square brackets, eg. "[fe80::6d6d:f72c:3ad:60b8]". Scopes are permitted.
+		 * @param init - Optional partial initialization parameters
+		 */
 		constructor(
 			readonly addr: string,
 			init?: Partial<DNSCrypt>,
@@ -53,6 +103,10 @@ export namespace DNSStamp {
 			Object.assign(this, init);
 		}
 
+		/**
+         * Converts the DNSCrypt stamp to its string representation.
+         * @returns The string representation of the DNSCrypt stamp
+         */
 		public toString() {
 			const props = this.props.toNumber();
 			const addr = this.addr.split("").map((c) => c.charCodeAt(0));
@@ -79,28 +133,40 @@ export namespace DNSStamp {
 		}
 	}
 
-	export class ODOH {
+	/**
+	 * Represents an Oblivious DNS over HTTPS stamp.
+	 */
+	export class ODOH implements Stamp {
+		/**
+		 * The properties of the ODOH stamp.
+		 */
 		props = new Properties();
 
-		// hostname is the server host name which will also be used as a SNI name.
-		// If the host name contains characters outside the URL-permitted range,
-		// these characters should be sent as-is, without any extra encoding
-		// (neither URL-encoded nor punycode).
+		/**
+		 * The server hostname which will be used as SNI name.
+		 * Characters outside URL-permitted range should be sent as-is.
+		 * (neither URL-encoded nor punycode).
+		 * @default ""
+		 */
 		hostName = "";
 
-		// path is the absolute URI path, such as /.well-known/dns-query.
+		/**
+		 * The absolute URI path (e.g., /.well-known/dns-query).
+		 */
 		path = "";
 
-		// Creates a new Oblivious DNS over HTTPS stamp.
-		//
-		// @param addr is the IP address of the server.It can be an empty
-		// string, or just a port number, represented with a preceding colon
-		// (:443). In that case, the host name will be resolved to an IP address
-		// using another resolver.
+		/**
+		 * Creates a new Oblivious DNS over HTTPS (ODoH) stamp.
+		 * @param init - Optional partial initialization parameters
+		 */
 		constructor(init?: Partial<ODOH>) {
 			Object.assign(this, init);
 		}
 
+		/**
+         * Converts the ODOH stamp to its string representation.
+         * @returns The string representation of the ODOH stamp
+         */
 		public toString(): string {
 			const props = this.props.toNumber();
 
@@ -123,18 +189,23 @@ export namespace DNSStamp {
 		}
 	}
 
+	/**
+	 * Represents a DNS over HTTPS stamp.
+	 */
 	export class DOH extends ODOH {
-		// hashi is the SHA256 digest of one of the TBS certificate found in the
-		// validation chain, typically the certificate used to sign the resolver’s
-		// certificate. Multiple hashes can be provided for seamless rotations.
+		/**
+		 * SHA256 digest of one of the TBS certificate(s) in the validation chain.
+		 * This is typically the certificate used to sign the resolver's certificate.
+		 * Multiple hashes can be provided for rotation support.
+		 */
 		hash = "";
 
-		// Creates a new DNS over HTTPS stamp.
-		//
-		// @param addr is the IP address of the server.It can be an empty
-		// string, or just a port number, represented with a preceding colon
-		// (:443). In that case, the host name will be resolved to an IP address
-		// using another resolver.
+		/**
+		 * Creates a new DNS over HTTPS (DoH) stamp.
+		 * If the 'addr' parameter is an empty string or just a port number, the host name will be resolved to an IP address using another resolver.
+		 * @param addr - Either Server IP address or port with colon prefix
+		 * @param init - Optional partial initialization parameters
+		 */
 		constructor(
 			readonly addr: string,
 			init?: Partial<DOH>,
@@ -143,11 +214,20 @@ export namespace DNSStamp {
 			Object.assign(this, init);
 		}
 
+		/**
+         * Converts the DOH stamp to its string representation.
+         * @returns The string representation of the DOH stamp
+         */
 		public toString(): string {
 			return this._toString(Protocol.DOH);
 		}
 
-		_toString(protocol: Protocol) {
+		/**
+         * Converts the stamp to its string representation with the specified protocol.
+         * @param protocol - The protocol to use for the string representation
+         * @returns The string representation of the stamp
+         */
+		_toString(protocol: Protocol): string {
 			const props = this.props.toNumber();
 			const addr = this.addr.split("").map((c) => c.charCodeAt(0));
 
@@ -163,25 +243,32 @@ export namespace DNSStamp {
 		}
 	}
 
-	export class DOT {
+	/**
+	 * Represents a DNS over TLS stamp.
+	 */
+	export class DOT implements Stamp {
+		/**
+		 * The properties of the DOT stamp.
+		 */
 		props = new Properties();
 
-		// hostname hostname is the server host name which will also be used as
-		// a SNI name.
+		/**
+		 * The server hostname used as SNI name.
+		 */
 		hostName = "";
 
-		// hashi is the SHA256 digest of one of the TBS certificate found in the
-		// validation chain, typically the certificate used to sign the resolver’s
-		// certificate. Multiple hashes can be provided for seamless rotations.
+		/**
+		 * SHA256 digest of TBS certificate in the validation chain.
+		 * Multiple hashes can be provided for rotation support.
+		 */
 		hash = "";
 
-		// Creates a new DNS over TLS stamp.
-		//
-		// @param addr is the IP address of the server. It can be an empty
-		// string, or just a port number. In that case, the host name will be
-		// resolved to an IP address using another resolver. IPv6 strings must
-		// be included in square brackets: [fe80::6d6d:f72c:3ad:60b8]. Scopes
-		// are permitted.
+		/**
+		 * Creates a new DNS over TLS (DoT) stamp.
+		 * If the 'addr' parameter is an empty string or just a port number, the host name will be resolved to an IP address using another resolver.
+		 * @param addr - Server IP address. IPv6 addresses must be in square brackets, eg. "[fe80::6d6d:f72c:3ad:60b8]". Scopes are permitted.
+		 * @param init - Optional partial initialization parameters
+		 */
 		constructor(
 			readonly addr: string,
 			init?: Partial<DOT>,
@@ -189,6 +276,10 @@ export namespace DNSStamp {
 			Object.assign(this, init);
 		}
 
+		/**
+         * Converts the DOT stamp to its string representation.
+         * @returns The string representation of the DOT stamp
+         */
 		public toString(): string {
 			const props = this.props.toNumber();
 			const addr = this.addr.split("").map((c) => c.charCodeAt(0));
@@ -203,16 +294,21 @@ export namespace DNSStamp {
 		}
 	}
 
-	export class Plain {
+	/**
+	 * Represents a plain DNS stamp.
+	 */
+	export class Plain implements Stamp {
+		/**
+		 * The properties of the plain DNS stamp.
+		 */
 		props = new Properties();
 
-		// Creates a new Plain DNS stamp.
-		//
-		// @param addr is the IP address of the server. It can be an empty
-		// string, or just a port number. In that case, the host name will be
-		// resolved to an IP address using another resolver. IPv6 strings must
-		// be included in square brackets: [fe80::6d6d:f72c:3ad:60b8]. Scopes
-		// are permitted.
+		/**
+		 * Creates a new Plain DNS stamp.
+		 * If the 'addr' parameter is an empty string or just a port number, the host name will be resolved to an IP address using another resolver.
+		 * @param addr - Server IP address or port number. IPv6 addresses must be in square brackets, eg. "[fe80::6d6d:f72c:3ad:60b8]". Scopes are permitted.
+		 * @param init - Optional partial initialization parameters
+		 */
 		constructor(
 			readonly addr: string,
 			init?: Partial<Plain>,
@@ -220,6 +316,10 @@ export namespace DNSStamp {
 			Object.assign(this, init);
 		}
 
+		/**
+         * Converts the Plain stamp to its string representation.
+         * @returns The string representation of the Plain stamp
+         */
 		public toString(): string {
 			const props = this.props.toNumber();
 			const addr = this.addr.split("").map((c) => c.charCodeAt(0));
@@ -240,20 +340,28 @@ export namespace DNSStamp {
 		}
 	}
 
-	export class AnonymizedRelay {
+	/**
+	 * Represents an anonymized DNS relay stamp.
+	 */
+	export class AnonymizedRelay implements Stamp {
+		/**
+		 * The relay server address.
+		 */
 		addr: string;
 
-		// Creates a new Plain DNS stamp.
-		//
-		// @param addr is the IP address of the server. It can be an empty
-		// string, or just a port number. In that case, the host name will be
-		// resolved to an IP address using another resolver. IPv6 strings must
-		// be included in square brackets: [fe80::6d6d:f72c:3ad:60b8]. Scopes
-		// are permitted.
+		/**
+		 * Creates a new AnonymizedRelay DNS stamp.
+		 * If the 'addr' parameter is an empty string or just a port number, the host name will be resolved to an IP address using another resolver.
+		 * @param addr - Server IP address or port number. IPv6 addresses must be in square brackets, eg. "[fe80::6d6d:f72c:3ad:60b8]". Scopes are permitted.
+		 */
 		constructor(addr: string) {
 			this.addr = addr;
 		}
 
+		/**
+         * Converts the Anonymized Relay stamp to its string representation.
+         * @returns The string representation of the Anonymized Relay stamp
+         */
 		public toString(): string {
 			const addr = this.addr.split("").map((c) => c.charCodeAt(0));
 
@@ -263,14 +371,23 @@ export namespace DNSStamp {
 		}
 	}
 
+	/**
+	 * Represents an Oblivious DNS over HTTPS relay stamp.
+	 */
 	export class ODOHRelay extends DOH {
 		public toString(): string {
 			return this._toString(Protocol.ODOHRelay);
 		}
 	}
 
+	/**
+	 * Parses a DNS stamp string into its corresponding stamp object.
+	 * @param stamp - The DNS stamp string to parse (must start with "sdns://")
+	 * @returns The parsed stamp object
+	 * @throws Error if the stamp is invalid or the protocol is unsupported
+	 */
 	export function parse(stamp: string): Stamp {
-		if (stamp.substr(0, 7) !== "sdns://") {
+		if (!stamp.startsWith("sdns://")) {
 			throw new Error("invalid scheme");
 		}
 		const bin = URLSafeBase64.decode(stamp.substr(7));
