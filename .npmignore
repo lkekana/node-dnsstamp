@@ -1,0 +1,20 @@
+node_modules/
+.nyc_output/
+coverage/
+dist/
+**/.DS_Store
+biome.json
+.gitignore
+.git
+pnpm-lock.yaml
+
+# Additional recommended patterns
+.env*
+*.log
+.vscode/
+.idea/
+*.test.*
+*.spec.*
+docs/
+examples/
+tests/
